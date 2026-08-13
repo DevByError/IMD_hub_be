@@ -9,21 +9,25 @@ const MAX_PHOTO_BYTES = 2 * 1024 * 1024; // matches the old multipart profile_ph
 const ALLOWED_PHOTO_MIME = ['image/jpeg', 'image/png', 'image/webp'];
 const DATA_URI_PATTERN = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/;
 
-const SELF_EDITABLE_FIELDS = ['phoneNumber', 'address', 'gender', 'nextOfKinName', 'nextOfKinContact'];
-const ADMIN_ONLY_FIELDS = [
-  'fullName',
+// Personal info (who you are) is self-editable; employment record + account
+// state (what your job/access is) stays admin-only. idDocumentNumber is
+// still encrypted at rest either way (see user.model.js) and still only
+// ever returned masked (see sanitizeUser below) — self-editing it doesn't
+// change either of those protections, it just lets the employee correct a
+// typo instead of waiting on an admin.
+const SELF_EDITABLE_FIELDS = [
+  'phoneNumber',
+  'address',
+  'gender',
+  'nextOfKinName',
+  'nextOfKinContact',
+  'dateOfBirth',
+  'nationality',
   'idDocumentType',
   'idDocumentNumber',
-  'dateOfBirth',
-  'position',
-  'employmentType',
-  'dateJoined',
-  'nationality',
   'staffId',
-  'status',
-  'staffStatus',
-  'lastAppraisalDate',
 ];
+const ADMIN_ONLY_FIELDS = ['fullName', 'position', 'employmentType', 'dateJoined', 'status', 'staffStatus', 'lastAppraisalDate'];
 
 // The idDocumentNumber getter on the User model decrypts transparently
 // (see user.model.js) — which means an unmodified Sequelize instance handed
@@ -105,6 +109,17 @@ const updateProfile = async (targetUserId, body, requester, req) => {
   const updates = {};
   for (const field of allowedFields) {
     if (Object.prototype.hasOwnProperty.call(body, field)) updates[field] = body[field];
+  }
+
+  // staffId is unique at the DB level (see user.model.js) — check up front
+  // and return a clear 409 rather than letting a raw
+  // SequelizeUniqueConstraintError fall through to a generic 500 (see
+  // errorHandler.middleware.js). Matters more now that any staff member can
+  // set their own staffId, not just an admin (see registration.service.js's
+  // approve() for the same check on the admin-driven path).
+  if (updates.staffId && updates.staffId !== user.staffId) {
+    const staffIdTaken = await User.findOne({ where: { staffId: updates.staffId } });
+    if (staffIdTaken) throw new AppError(409, 'That Staff ID is already in use.');
   }
 
   Object.assign(user, updates);

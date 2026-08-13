@@ -1,0 +1,27 @@
+[
+  {
+    "fullName": "Jane Doe",
+    "email": "jane.doe@example.com",
+    "phoneNumber": "+60123456789",
+    "idDocumentType": "passport",
+    "idDocumentNumber": "A1234567",
+    "dateOfBirth": "1992-04-15",
+    "address": "12 Jalan Example, Kuching",
+    "gender": "female",
+    "nationality": "Malaysian",
+    "position": "Marketing Officer",
+    "employmentType": "full_time",
+    "dateJoined": "2026-08-13",
+    "staffId": "TAC-0021",
+    "nextOfKinName": "John Doe",
+    "nextOfKinContact": "+60198765432",
+    "lastAppraisalDate": "2026-01-15",
+    "role": "Staff"
+  },
+  {
+    "fullName": "Second Person",
+    "email": "second.person@example.com",
+    "role": "Team Admin",
+    "team": "Marketing"
+  }
+]

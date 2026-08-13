@@ -1,4 +1,32 @@
+# Dependencies
 node_modules/
+
+# Environment / secrets
 .env
+.env.local
+.env.*.local
+
+# Uploaded files (user content, not source)
 uploads/
+
+# Real employee data for scripts/add-staff.js — names, ID numbers,
+# addresses, role grants. The .example.json template stays tracked; this
+# never does.
+scripts/staff-data.json
+
+# Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build / coverage output
+dist/
+build/
+coverage/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
